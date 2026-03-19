@@ -1,0 +1,86 @@
+# ─────────────────────────────────────────────────────────────
+# blog-generator.yml
+# GitHub Actions Workflow — Auto AI Blog Generator
+#
+# Runs every 10 minutes, generates a blog post with AI,
+# and commits the new Markdown file back to the repository.
+# ─────────────────────────────────────────────────────────────
+
+name: Auto AI Blog Generator
+
+on:
+  # ── Scheduled trigger: every 10 minutes ──────────────────
+  schedule:
+    - cron: "*/10 * * * *"
+
+  # ── Manual trigger from GitHub Actions UI ────────────────
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to push commits back to the repo
+
+jobs:
+  generate-blog:
+    name: Generate & Commit Blog Post
+    runs-on: ubuntu-latest
+    timeout-minutes: 8    # safety net — kills job if it hangs
+
+    steps:
+      # ── 1. Check out the repository ──────────────────────
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1        # shallow clone is enough
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Set up Python ─────────────────────────────────
+      - name: Set Up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"          # cache pip downloads for speed
+
+      # ── 3. Install dependencies ──────────────────────────
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ── 4. Run the blog generator ────────────────────────
+      - name: Generate Blog Post
+        id: generate
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          # Run the script and capture its output
+          OUTPUT=$(python scripts/generate_blog.py 2>&1)
+          echo "$OUTPUT"
+
+          # Check if a new blog was created
+          if echo "$OUTPUT" | grep -q "NEW_BLOG_CREATED=true"; then
+            echo "new_blog=true" >> $GITHUB_OUTPUT
+          else
+            echo "new_blog=false" >> $GITHUB_OUTPUT
+          fi
+
+      # ── 5. Commit & push (only if new file was created) ──
+      - name: Commit and Push Blog
+        if: steps.generate.outputs.new_blog == 'true'
+        run: |
+          git config --global user.name  "Auto Blog Bot"
+          git config --global user.email "bot@auto-ai-blog.noreply"
+
+          # Stage only new markdown files in /blogs
+          git add blogs/*.md
+
+          # Create a timestamped commit message
+          TIMESTAMP=$(date -u "+%Y-%m-%d %H:%M UTC")
+          git commit -m "🤖 Auto Blog: New post generated — $TIMESTAMP"
+
+          # Push back to the same branch
+          git push origin HEAD:${{ github.ref_name }}
+
+      # ── 6. Skip notice (no new file) ─────────────────────
+      - name: No New Blog
+        if: steps.generate.outputs.new_blog != 'true'
+        run: echo "ℹ️  No new blog post was generated this run. Skipping commit."

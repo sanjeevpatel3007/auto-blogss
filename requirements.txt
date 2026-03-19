@@ -1,0 +1,7 @@
+# Auto AI Blog Generator — Python Dependencies
+
+# HTTP requests (OpenRouter API calls)
+requests>=2.31.0
+
+# Google Trends fetcher (optional — falls back to static topics if unavailable)
+pytrends>=4.9.2
