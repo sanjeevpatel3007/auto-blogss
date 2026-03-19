@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────
+# Jekyll Site Configuration
+# ─────────────────────────────────────────
+
+# Your site details — CHANGE THESE
+title: "AI Blog"
+description: "Daily AI news, model comparisons, and tech insights — auto-updated every 10 minutes."
+author: "AI Blog Bot"
+email: ""
+url: "https://sanjeevpatel3007.github.io"          # ← change this
+baseurl: "/auto-blogss"                       # ← change this (e.g. /auto-ai-blog-generator)
+
+# Theme — Minima is clean, free, built into GitHub Pages
+theme: minima
+
+# Minima theme settings
+minima:
+  skin: dark    # options: classic / dark / solarized / solarized-dark
+
+# Show these in the navigation bar
+header_pages:
+  - about.md
+
+# Blog post settings
+permalink: /blogs/:slug/     # URL format for each post
+paginate: 10                  # 10 posts per page
+
+# Jekyll build settings
+markdown: kramdown
+highlighter: rouge
+
+# Tell Jekyll where your blog posts are
+collections:
+  blogs:
+    output: true
+    permalink: /blogs/:path/
+
+# Plugins (all supported free on GitHub Pages)
+plugins:
+  - jekyll-feed            # creates RSS feed automatically
+  - jekyll-seo-tag         # adds SEO meta tags to every page
+  - jekyll-sitemap         # auto-generates sitemap.xml for Google
+
+# SEO settings (jekyll-seo-tag uses these)
+twitter:
+  username: ""             # your Twitter handle (optional)
+
+social:
+  name: "AI Blog"
+  links: []
+
+# Exclude these from the built site
+exclude:
+  - scripts/
+  - requirements.txt
+  - "*.py"
+  - ".github/"
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
