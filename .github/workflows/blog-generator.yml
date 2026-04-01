@@ -67,9 +67,8 @@ jobs:
       - name: Commit and Push Blog
         if: steps.generate.outputs.new_blog == 'true'
         run: |
-          git config --global user.name  "Auto Blog Bot"
-          git config --global user.email "bot@auto-ai-blog.noreply"
-
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
           # Stage only new markdown files in /blogs
           git add blogs/*.md
 
